@@ -1,0 +1,38 @@
+{
+  "name": "@sphyra/expo-demo",
+  "private": true,
+  "version": "0.0.0",
+  "main": "index.ts",
+  "scripts": {
+    "prestart": "pnpm --dir ../.. build",
+    "preios": "pnpm --dir ../.. build",
+    "preios:26": "pnpm --dir ../.. build",
+    "start": "expo start",
+    "ios": "node scripts/ios-boot-simulator.mjs && expo run:ios",
+    "ios:26": "node scripts/ios-boot-simulator.mjs && expo run:ios",
+    "preandroid": "pnpm --dir ../.. build",
+    "android": "bash scripts/android-usb.sh",
+    "android:local": "bash scripts/with-android-env.sh expo run:android",
+    "android:emu": "bash scripts/with-android-env.sh env REACT_NATIVE_PACKAGER_HOSTNAME=10.0.2.2 expo run:android",
+    "prebuild": "expo prebuild",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "smoke": "node --import tsx --test smoke.test.ts"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.29.0",
+    "@maplibre/maplibre-react-native": "^10.0.0",
+    "@sphyra/react-native": "link:../..",
+    "expo": "~52.0.0",
+    "expo-location": "~18.0.10",
+    "react": "18.3.1",
+    "react-native": "0.76.9"
+  },
+  "devDependencies": {
+    "@types/react": "~18.3.12",
+    "babel-preset-expo": "~12.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "~5.9.0",
+    "vitest": "^2.1.5"
+  }
+}

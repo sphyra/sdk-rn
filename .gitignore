@@ -1,0 +1,23 @@
+node_modules
+.DS_Store
+.env
+.env.*
+dist
+build
+.expo
+.expo-shared
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editors / IDEs
+.idea/
+*.iml
+.fleet/
+.vscode/
+.history/
+
+# OS / tooling noise
+Thumbs.db
+*.swp

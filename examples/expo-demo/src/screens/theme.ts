@@ -1,0 +1,20 @@
+export const theme = {
+  railW: 56,
+  panelW: 280,
+  primary: "#2563eb",
+  primarySoft: "#eff6ff",
+  surface: "#ffffff",
+  surface2: "#f8fafc",
+  border: "#e2e8f0",
+  text: "#0f172a",
+  textMuted: "#64748b",
+  railBg: "#1e293b",
+  railHover: "#334155",
+  railActive: "#2563eb",
+  presetColors: {
+    dawn: "#fdba74",
+    day: "#fbbf24",
+    dusk: "#fb923c",
+    night: "#a5b4fc",
+  } as const,
+};
