@@ -85,6 +85,7 @@ describe("<SphyraMap>", () => {
 
     await waitFor(() => expect(screen.queryByTestId("mapview")).not.toBeNull());
     expect(layer(lastProps.mapView.mapStyle, "background").paint["background-color"]).toBe("#0b1020");
+    expect(lastProps.mapView.localIdeographFontFamily).toBe("sans-serif");
   });
 
   it("S2 — passes camera props (pitch defaults to the mode table value)", async () => {
@@ -178,5 +179,18 @@ describe("<SphyraMap>", () => {
       centerCoordinate: [44.6, 40.2],
       zoomLevel: 14,
     });
+  });
+
+  it("language prop is forwarded to getMapStyle", async () => {
+    const client = makeClient();
+
+    render(
+      <SphyraProvider client={client}>
+        <SphyraMap language="ka" />
+      </SphyraProvider>,
+    );
+
+    await waitFor(() => expect(screen.queryByTestId("mapview")).not.toBeNull());
+    expect(client.getMapStyle).toHaveBeenCalledWith(expect.objectContaining({ language: "ka" }));
   });
 });

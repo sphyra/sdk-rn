@@ -27,6 +27,8 @@ export interface SphyraMapProps {
   pitch?: number; // default: pitch from the mode table
   onLoad?: () => void;
   onError?: (err: SphyraError) => void;
+  /** Label language forwarded to `getMapStyle`. Default is the API's `local`. */
+  language?: string;
   onRegionChange?: (region: unknown) => void;
   /** Fires continuously *during* a gesture, before it settles. */
   onRegionIsChanging?: (region: unknown) => void;
@@ -91,7 +93,9 @@ export const SphyraMap = forwardRef<SphyraMapHandle, SphyraMapProps>(function Sp
 
     const load = async (): Promise<void> => {
       try {
-        const s = await client.getMapStyle();
+        const s = await client.getMapStyle(
+          props.language !== undefined ? { language: props.language } : {},
+        );
         if (cancelled) return;
         setBaseStyle(s);
         scheduleRefresh(s);
@@ -105,7 +109,7 @@ export const SphyraMap = forwardRef<SphyraMapHandle, SphyraMapProps>(function Sp
       cancelled = true;
       clearRefresh();
     };
-  }, [client]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [client, props.language]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const mapStyle = useMemo(
     () => (baseStyle ? applyStyleVariant(baseStyle, preset, mode) : null),
@@ -146,6 +150,8 @@ export const SphyraMap = forwardRef<SphyraMapHandle, SphyraMapProps>(function Sp
       attributionPosition={props.attributionPosition}
       logoEnabled={props.logoEnabled}
       logoPosition={props.logoPosition}
+      // Native MapLibre CJK fallback. Current @maplibre/maplibre-react-native typings omit it.
+      {...({ localIdeographFontFamily: "sans-serif" } as Record<string, unknown>)}
     >
       <Camera
         ref={cameraRef}
