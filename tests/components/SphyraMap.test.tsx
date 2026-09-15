@@ -85,6 +85,7 @@ describe("<SphyraMap>", () => {
 
     await waitFor(() => expect(screen.queryByTestId("mapview")).not.toBeNull());
     expect(layer(lastProps.mapView.mapStyle, "background").paint["background-color"]).toBe("#0b1020");
+    expect(lastProps.mapView.localIdeographFontFamily).toBe("sans-serif");
   });
 
   it("S2 — passes camera props (pitch defaults to the mode table value)", async () => {

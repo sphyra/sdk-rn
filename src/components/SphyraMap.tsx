@@ -150,6 +150,8 @@ export const SphyraMap = forwardRef<SphyraMapHandle, SphyraMapProps>(function Sp
       attributionPosition={props.attributionPosition}
       logoEnabled={props.logoEnabled}
       logoPosition={props.logoPosition}
+      // Native MapLibre CJK fallback. Current @maplibre/maplibre-react-native typings omit it.
+      {...({ localIdeographFontFamily: "sans-serif" } as Record<string, unknown>)}
     >
       <Camera
         ref={cameraRef}

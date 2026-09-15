@@ -1,6 +1,6 @@
 {
   "name": "@sphyra/react-native",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "React Native SDK for the Sphyra map & geocoding API",
   "license": "UNLICENSED",
   "private": false,
