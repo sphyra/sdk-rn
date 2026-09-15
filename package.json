@@ -1,9 +1,20 @@
 {
   "name": "@sphyra/react-native",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "React Native SDK for the Sphyra map & geocoding API",
   "license": "UNLICENSED",
   "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sphyra/sdk-rn.git"
+  },
+  "homepage": "https://github.com/sphyra/sdk-rn#readme",
+  "bugs": {
+    "url": "https://github.com/sphyra/sdk-rn/issues"
+  },
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
