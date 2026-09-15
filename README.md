@@ -61,13 +61,6 @@ The dev key `sphyra_dev_local` is seeded automatically. Never commit a productio
 pnpm add @sphyra/react-native @maplibre/maplibre-react-native
 ```
 
-`@sphyra/react-native` is **not yet on npm**. Until publish:
-
-```bash
-pnpm add file:../sdk-rn @maplibre/maplibre-react-native
-# or: pnpm add git+https://github.com/sphyra/sdk-rn.git#main @maplibre/maplibre-react-native
-```
-
 | Package | Role |
 |---------|------|
 | `@maplibre/maplibre-react-native ^10.0.0` | **Required** peer — map rendering |
