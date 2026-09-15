@@ -179,4 +179,17 @@ describe("<SphyraMap>", () => {
       zoomLevel: 14,
     });
   });
+
+  it("language prop is forwarded to getMapStyle", async () => {
+    const client = makeClient();
+
+    render(
+      <SphyraProvider client={client}>
+        <SphyraMap language="ka" />
+      </SphyraProvider>,
+    );
+
+    await waitFor(() => expect(screen.queryByTestId("mapview")).not.toBeNull());
+    expect(client.getMapStyle).toHaveBeenCalledWith(expect.objectContaining({ language: "ka" }));
+  });
 });
