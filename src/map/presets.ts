@@ -61,18 +61,27 @@ export const ROAD_GROUND_LAYER_IDS = [
   "roads-crosswalk-base",
   "roads-crosswalk",
   "roads-oneway",
-  "roads-label",
-] as const;
-
-/** POI badges, address numbers, and place names sit above extruded buildings. */
-export const LAYERS_ABOVE_BUILDINGS_3D = [
+  // Poles, lamps and power lines are ground ink too — above the extrusions they speckled roofs.
   "infrastructure-line",
   "infrastructure-point",
   "street-furniture-circle",
+  "roads-label",
+] as const;
+
+/** Drawn straight after the building stack so buildings never cover POI labels (API 11-023). */
+export const LAYERS_ON_BUILDINGS_3D = ["pois"] as const;
+
+/** Ground shadows · walls · roof cap (API 11-023), always drawn together in this order. */
+export const BUILDING_FACADE_LAYERS = [
+  "buildings-ao",
+  "buildings-ao-contact",
+  "buildings-3d",
+  "buildings-3d-roof",
+] as const;
+
+/** Address numbers and place names sit above extrusions. */
+export const LAYERS_ABOVE_BUILDINGS_3D = [
   "natural-peak",
-  "pois-circle",
-  "pois-icon",
-  "pois-label",
   "buildings-housenumber-label",
   "housenumbers-label",
   "landuse-label",
@@ -86,17 +95,24 @@ function extractLayer(layers: StyleLayer[], id: string): StyleLayer | null {
   return layers.splice(idx, 1)[0] ?? null;
 }
 
-/** Normalize: … → road stack → buildings-3d → POIs / housenumbers / place labels. */
+/** Normalize: … → road/POI ground stack → facade stack → housenumbers / place labels. */
 export function apply3dGroundDepth(style: SphyraStyle): void {
   const layers = (style["layers"] as StyleLayer[] | undefined) ?? [];
-  const buildings3d = extractLayer(layers, "buildings-3d");
-  if (!buildings3d) return;
+  if (!layers.some((l) => l.id === "buildings-3d")) return;
+  const facade = BUILDING_FACADE_LAYERS.map((id) => extractLayer(layers, id)).filter(
+    (layer): layer is StyleLayer => layer !== null,
+  );
+  const buildings3d = facade.find((l) => l.id === "buildings-3d")!;
 
   const roadLayers: StyleLayer[] = [];
   for (const id of ROAD_GROUND_LAYER_IDS) {
     const layer = extractLayer(layers, id);
     if (layer) roadLayers.push(layer);
   }
+
+  const onBuildings = LAYERS_ON_BUILDINGS_3D.map((id) => extractLayer(layers, id)).filter(
+    (layer): layer is StyleLayer => layer !== null,
+  );
 
   const roadsLabel = roadLayers.find((l) => l.id === "roads-label");
   if (roadsLabel?.layout) {
@@ -112,12 +128,23 @@ export function apply3dGroundDepth(style: SphyraStyle): void {
   );
   if (insertIdx < 0) insertIdx = layers.length;
 
-  layers.splice(insertIdx, 0, ...roadLayers, buildings3d);
+  layers.splice(insertIdx, 0, ...roadLayers, ...facade, ...onBuildings);
   enforceOpaqueBuildings3d(buildings3d);
 }
 
 function enforceOpaqueBuildings3d(layer: { id: string; paint?: Record<string, unknown> }): void {
   layer.paint = { ...(layer.paint ?? {}), "fill-extrusion-opacity": 1 };
+}
+
+/**
+ * Root properties the web renderer uses and MapLibre Native does not implement: the sky gradient,
+ * the globe projection, and Mapbox's `fog` (which MapLibre never had). The native style parser
+ * warns about properties it does not know, so drop them rather than ship a style that logs on
+ * every load. Mobile therefore stays mercator with a plain sky — tracked for the MapLibre Native
+ * upgrade (ADR-008).
+ */
+function stripWebOnlyRootProperties(style: SphyraStyle): void {
+  for (const key of ["sky", "projection", "fog"]) delete (style as Record<string, unknown>)[key];
 }
 
 /**
@@ -131,6 +158,8 @@ export function applyStyleVariant(style: SphyraStyle, preset: StylePreset, mode:
   if (presets?.[preset]) {
     const def = presets[preset];
     clone["light"] = { ...def.light };
+    // `sky`, `projection` and the web-only `stars` never reach the native renderer — see the
+    // strip below; the preset's light and layer paint are all MapLibre Native reads.
     for (const [layerId, paint] of Object.entries(def.layers)) {
       const layer = layers.find((l) => l.id === layerId);
       if (layer) layer.paint = { ...(layer.paint ?? {}), ...paint };
@@ -138,14 +167,18 @@ export function applyStyleVariant(style: SphyraStyle, preset: StylePreset, mode:
   }
   const modes = readModeTable(clone);
   if (modes?.[mode]) {
-    const hidden = new Set(modes[mode].hiddenLayers);
+    const modeDef = modes[mode];
+    const hidden = new Set(modeDef.hiddenLayers);
     for (const id of toggleableLayers(clone)) {
       const layer = layers.find((l) => l.id === id);
       if (layer) layer.layout = { ...(layer.layout ?? {}), visibility: hidden.has(id) ? "none" : "visible" };
     }
+    if (modeDef.terrain) clone["terrain"] = { ...modeDef.terrain };
+    else delete clone["terrain"];
   }
   apply3dGroundDepth(clone);
   const b3d = layers.find((l) => l.id === "buildings-3d");
   if (b3d) enforceOpaqueBuildings3d(b3d);
+  stripWebOnlyRootProperties(clone);
   return clone;
 }
