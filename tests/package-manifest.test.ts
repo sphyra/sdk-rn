@@ -29,10 +29,10 @@ const pkgPath = join(dirname(fileURLToPath(import.meta.url)), "../package.json")
 const pkg = JSON.parse(readFileSync(pkgPath, "utf8")) as PackageManifest;
 
 describe("package.json publish manifest", () => {
-  describe("1.1.0 public-publish surface", () => {
-    it("is scoped @sphyra/react-native at version 1.1.0 and is not private", () => {
+  describe("1.2.0 public-publish surface", () => {
+    it("is scoped @sphyra/react-native at version 1.2.0 and is not private", () => {
       expect(pkg.name).toBe("@sphyra/react-native");
-      expect(pkg.version).toBe("1.1.0");
+      expect(pkg.version).toBe("1.2.0");
       expect(pkg.private).toBe(false);
     });
 

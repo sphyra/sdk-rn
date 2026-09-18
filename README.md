@@ -144,6 +144,30 @@ function TileConfigPanel() {
 
 </details>
 
+### 1.2.0 — Mapbox Standard look
+
+The style this SDK renders was rebuilt for Mapbox Standard parity (`S-1.0.0-11-023`). What changed for
+consumers:
+
+- **New layer ids.** Buildings are now a stack — `buildings-ao`, `buildings-ao-contact` (ground
+  shadows), `buildings-3d` (walls) and `buildings-3d-roof` (roof-edge contour). If you toggle layers by id, use
+  `metadata["sphyra:layerGroups"]` instead of hard-coded lists.
+- **POIs draw above the buildings** so a building never covers the labels in front of it.
+  `applyStyleVariant()` (which calls `apply3dGroundDepth()`) keep that order; call them after adding your own
+  layers if you insert into the middle of the stack.
+- **Preset colours look wrong in isolation and right on screen** — they are fitted through MapLibre's
+  extrusion lighting (see the `Map-Style-Standard` documentation page). Change them through the
+  preset table, not by editing layer paint.
+- **Zoom ranges match the tile server**: buildings and POIs come from z18 tiles and MapLibre
+  overzooms above. Asking for z19+ tiles used to 404 and buildings vanished while zooming.
+- **The sky and the globe are web-only, and this SDK strips them.** The style carries a `sky` per
+  preset and a `projection` (globe when zoomed out) for MapLibre GL JS 5; MapLibre Native implements
+  neither, so `applyStyleVariant()` deletes `sky`, `projection` and the legacy `fog` before the style
+  reaches the native renderer — otherwise they would only produce warnings on every load. Mobile keeps
+  the mercator map with a plain sky. Closing that gap is the MapLibre Native engine upgrade, not this
+  release (ADR-008).
+- Tiles are served gzipped and cacheable; a viewport is roughly half the bytes it was.
+
 ## Geocoding
 
 ### Reverse — `useReverseGeocode(client, params)`

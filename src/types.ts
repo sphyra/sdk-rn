@@ -334,13 +334,31 @@ export type StyleMode = "2d" | "3d";
 export type SphyraStyle = Record<string, unknown>;
 
 export interface SphyraPresetLight {
-  anchor: "viewport";
+  anchor: "map" | "viewport";
   color: string;
   intensity: number;
+  position?: [number, number, number];
+}
+/**
+ * MapLibre `sky` — the gradient above the horizon and the globe's atmosphere. The API publishes it
+ * for every preset, but MapLibre Native does not implement it, so {@link applyStyleVariant} strips
+ * it from the style it hands the native renderer.
+ */
+export interface SphyraPresetSky {
+  "sky-color": string;
+  "horizon-color": string;
+  "fog-color": string;
+  "fog-ground-blend": number;
+  "horizon-fog-blend": number;
+  "sky-horizon-blend": number;
+  "atmosphere-blend": unknown;
 }
 export interface SphyraPresetDef {
   light: SphyraPresetLight;
-  layers: Record<string, Record<string, string>>;
+  sky?: SphyraPresetSky;
+  /** Starfield strength (web only — the native renderer has no custom-layer starfield). */
+  stars?: number;
+  layers: Record<string, Record<string, unknown>>;
 }
 export interface SphyraModeDef {
   hiddenLayers: string[];

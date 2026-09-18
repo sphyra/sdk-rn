@@ -1,6 +1,7 @@
 {
   "name": "@sphyra/react-native",
-  "version": "1.1.0",
+  "version": "1.2.0",
+  "packageManager": "pnpm@10.33.0",
   "description": "React Native SDK for the Sphyra map & geocoding API",
   "license": "UNLICENSED",
   "private": false,
@@ -25,7 +26,9 @@
       "require": "./dist/index.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "sideEffects": false,
   "scripts": {
     "build": "tsup",
