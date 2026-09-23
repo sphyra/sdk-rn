@@ -166,6 +166,28 @@ consumers:
   reaches the native renderer — otherwise they would only produce warnings on every load. Mobile keeps
   the mercator map with a plain sky. Closing that gap is the MapLibre Native engine upgrade, not this
   release (ADR-008).
+- **Set `minZoom` if your map can be pinched all the way out.** Because there is no globe to hand the
+  low zooms to, MapLibre Native keeps drawing the mercator plane and repeats it sideways once the
+  viewport is wider than the world — `512 * 2^zoom` dp, so from about z1.5 on a 13" tablet in
+  landscape, z0.9 on a phone in landscape. The result reads as several copies of the world side by
+  side. `<SphyraMap minZoom={3}>` puts the floor a continent-wide view above that threshold; the
+  matching `maxZoom` caps the other end. Both bound gestures *and* imperative `setCamera()`.
+- **`minZoom` alone is half the job — pair it with `maxBounds`.** The zoom floor stops the world
+  repeating sideways; it does nothing about running off the top. MapLibre paints `background` across
+  the whole viewport but has no geometry past ~85.05°, so panning over the pole fills the rest of the
+  screen with a slab of the ground colour. MapLibre fences the camera *centre*, not the viewport (on
+  Android `maxBounds` is `setLatLngBoundsForCameraTarget`), so the fence belongs half a viewport
+  below the pole — which is what `worldPanBounds(minZoom, viewportHeightDp)` returns:
+
+  ```tsx
+  import { SphyraMap, worldPanBounds } from "@sphyra/react-native";
+
+  const BOUNDS = worldPanBounds(3, Dimensions.get("window").height);
+
+  <SphyraMap minZoom={3} maxZoom={18} maxBounds={BOUNDS} />;
+  ```
+
+  The SDK never applies one on its own: only the consumer knows how tall the map is laid out.
 - Tiles are served gzipped and cacheable; a viewport is roughly half the bytes it was.
 
 ## Geocoding

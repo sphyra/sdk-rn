@@ -193,4 +193,89 @@ describe("<SphyraMap>", () => {
     await waitFor(() => expect(screen.queryByTestId("mapview")).not.toBeNull());
     expect(client.getMapStyle).toHaveBeenCalledWith(expect.objectContaining({ language: "ka" }));
   });
+
+  it("S7 — minZoom/maxZoom are forwarded to the Camera as minZoomLevel/maxZoomLevel", async () => {
+    const client = makeClient();
+
+    render(
+      <SphyraProvider client={client}>
+        <SphyraMap minZoom={3} maxZoom={18} />
+      </SphyraProvider>,
+    );
+
+    await waitFor(() => expect(screen.queryByTestId("camera")).not.toBeNull());
+    expect(lastProps.camera.minZoomLevel).toBe(3);
+    expect(lastProps.camera.maxZoomLevel).toBe(18);
+  });
+
+  it("S8 — omitting minZoom/maxZoom leaves the Camera unconstrained (MapLibre defaults)", async () => {
+    const client = makeClient();
+
+    render(
+      <SphyraProvider client={client}>
+        <SphyraMap />
+      </SphyraProvider>,
+    );
+
+    await waitFor(() => expect(screen.queryByTestId("camera")).not.toBeNull());
+    expect(lastProps.camera.minZoomLevel).toBeUndefined();
+    expect(lastProps.camera.maxZoomLevel).toBeUndefined();
+  });
+
+  it("S9 — an initial `zoom` below `minZoom` is clamped up to the floor", async () => {
+    const client = makeClient();
+
+    render(
+      <SphyraProvider client={client}>
+        <SphyraMap zoom={0} minZoom={3} />
+      </SphyraProvider>,
+    );
+
+    await waitFor(() => expect(screen.queryByTestId("camera")).not.toBeNull());
+    expect(lastProps.camera.zoomLevel).toBe(3);
+  });
+
+  it("S10 — setCamera() through the ref also respects the floor", async () => {
+    const client = makeClient();
+    const ref = createRef<SphyraMapHandle>();
+
+    render(
+      <SphyraProvider client={client}>
+        <SphyraMap ref={ref} minZoom={3} />
+      </SphyraProvider>,
+    );
+
+    await waitFor(() => expect(screen.queryByTestId("camera")).not.toBeNull());
+    act(() => ref.current!.setCamera({ zoom: 1 }));
+
+    expect(cameraSetCamera).toHaveBeenCalledWith(expect.objectContaining({ zoomLevel: 3 }));
+  });
+
+
+  it("S11 — maxBounds is forwarded to the Camera in MapLibre's {ne, sw} shape", async () => {
+    const client = makeClient();
+
+    render(
+      <SphyraProvider client={client}>
+        <SphyraMap maxBounds={{ ne: [180, 80], sw: [-180, -80] }} />
+      </SphyraProvider>,
+    );
+
+    await waitFor(() => expect(screen.queryByTestId("camera")).not.toBeNull());
+    expect(lastProps.camera.maxBounds).toEqual({ ne: [180, 80], sw: [-180, -80] });
+  });
+
+  it("S12 — omitting maxBounds leaves the Camera unbounded", async () => {
+    const client = makeClient();
+
+    render(
+      <SphyraProvider client={client}>
+        <SphyraMap minZoom={3} />
+      </SphyraProvider>,
+    );
+
+    await waitFor(() => expect(screen.queryByTestId("camera")).not.toBeNull());
+    expect(lastProps.camera.maxBounds).toBeUndefined();
+  });
+
 });
