@@ -84,6 +84,8 @@ export {
   STYLE_PRESETS,
   STYLE_MODES,
 } from "./map/presets";
+export { worldPanBounds, MERCATOR_LAT_LIMIT } from "./map/worldBounds";
+export type { WorldPanBounds } from "./map/worldBounds";
 export { SphyraMarker } from "./components/SphyraMarker";
 export type { SphyraMarkerProps } from "./components/SphyraMarker";
 export { SphyraPopup } from "./components/SphyraPopup";
